@@ -1,5 +1,6 @@
 package com.jaravir.urlshortener.service;
 
+import com.jaravir.urlshortener.config.Configuration;
 import com.jaravir.urlshortener.store.ShortUrlStore;
 import com.jaravir.urlshortener.validator.ShortUrlValidator;
 import org.junit.jupiter.api.Assertions;
@@ -8,15 +9,9 @@ import org.junit.jupiter.api.Test;
 class UrlShortenerServiceTest {
   final String TEST_URL = "http://example.com/abc/cde/abc.html";
   final String SEO_KEYWORD = "mySeoKeyword";
-  /**
-   * Test cases
-   * 1. Short ulr created and different from original long url
-   * 2. Two urls map to different short urls
-   * 3. Add same long url does not override it
-   * 4. Invalid url is not accepted
-   */
+
   @Test
-  void testCreateShortUrl_ValidUrl_ShouldBeDifferentFromInputUrl() {
+  void testCreateShortUrl_ValidUrl_SeoKeyWordProvided_ShouldUseSeoKeyWord() {
     UrlShortenerService service = createShortUrlService();
     CreateShortUrlResponse response = service.createShortUrl(TEST_URL, SEO_KEYWORD);
     Assertions.assertNotNull(response);
@@ -24,7 +19,7 @@ class UrlShortenerServiceTest {
     String shortUrl = response.getShortUrl();
 
     Assertions.assertNotNull(shortUrl);
-    Assertions.assertNotEquals(shortUrl, TEST_URL);
+    Assertions.assertEquals(shortUrl, Configuration.getInstance().getDomainName()+SEO_KEYWORD);
   }
 
   @Test
@@ -59,6 +54,20 @@ class UrlShortenerServiceTest {
     CreateShortUrlResponse secondResponse = service.createShortUrl("http://example2.com/test/long/url", SEO_KEYWORD);
     Assertions.assertTrue(secondResponse.isFailed());
     Assertions.assertEquals(secondResponse.getFailureDescription(), "Keyword " + SEO_KEYWORD + " is already in use. Please use a different one.");
+  }
+
+  @Test
+  void testCreateShortUrl_NoKeyword_ShouldGenerateRandomShortUrl() {
+    String domainName = Configuration.getInstance().getDomainName();
+    UrlShortenerService service = createShortUrlService();
+    CreateShortUrlResponse response = service.createShortUrl(TEST_URL, null);
+    Assertions.assertNotNull(response);
+    Assertions.assertTrue(response.isSuccess());
+    String shortUrl = response.getShortUrl();
+
+    Assertions.assertNotNull(shortUrl);
+    Assertions.assertTrue(shortUrl.startsWith(domainName));
+    Assertions.assertEquals(domainName.length() + Configuration.getInstance().getRandomShortUrlLength(), shortUrl.length());
   }
 
   private UrlShortenerService createShortUrlService() {

@@ -13,8 +13,4 @@ public class ShortUrlValidator {
     }
     return result;
   }
-
-  public String getValidationFailureDescription() {
-    return VALIDATION_FAILURE_DESCRIPTION;
-  }
 }

@@ -1,6 +1,7 @@
 package com.jaravir.urlshortener.service;
 
-import com.jaravir.urlshortener.generator.SeoShortUrlGenerator;
+import com.jaravir.urlshortener.generator.ShortUrlGenerator;
+import com.jaravir.urlshortener.generator.ShortUrlGeneratorFactory;
 import com.jaravir.urlshortener.store.DuplicateOriginalUrlException;
 import com.jaravir.urlshortener.store.DuplicateShortUrlException;
 import com.jaravir.urlshortener.store.ShortUrl;
@@ -26,13 +27,20 @@ public class UrlShortenerService {
       return response;
     }
 
-    SeoShortUrlGenerator generator = new SeoShortUrlGenerator();
-    ShortUrl shortUrl = generator.generate(originalUrl, seoKeyword);
+    ShortUrlGenerator generator = ShortUrlGeneratorFactory.getInstance().createShortUrlGenerator(seoKeyword);
+    ShortUrl shortUrl = generator.generate(originalUrl);
 
+    //regenerate if random short url and failed to save due to duplication
     try {
       store.save(originalUrl, shortUrl);
     } catch (DuplicateShortUrlException ex) {
-      response.setFailureDescription("Keyword " + seoKeyword + " is already in use. Please use a different one.");
+      if (seoKeyword != null && !seoKeyword.isEmpty()) {
+        response.setFailureDescription(
+            "Keyword " + seoKeyword + " is already in use. Please use a different one.");
+      } else {
+        response.setFailureDescription(
+            "Failed to create a short url. Please try again later.");
+      }
     } catch (DuplicateOriginalUrlException ex) {
       response.setFailureDescription("URL " + originalUrl + " is already mapped to a short URL.");
     }

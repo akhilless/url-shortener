@@ -9,6 +9,7 @@ public class ShortUlrValidatorTest {
     ShortUrlValidator validator = new ShortUrlValidator();
     ValidationResult result = validator.validate("htp:/invalidurl");
     Assertions.assertTrue(result.isFailed());
+    Assertions.assertEquals("Invalid URL.", result.getFailureDescription());
   }
 
   @Test
@@ -17,5 +18,6 @@ public class ShortUlrValidatorTest {
     ShortUrlValidator validator = new ShortUrlValidator();
     ValidationResult result = validator.validate(validUrl);
     Assertions.assertTrue(result.isPassed());
+    Assertions.assertNull(result.getFailureDescription());
   }
 }
