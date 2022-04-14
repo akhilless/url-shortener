@@ -1,6 +1,7 @@
 package com.jaravir.urlshortener.store;
 
 import com.jaravir.urlshortener.config.Configuration;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -45,6 +46,31 @@ class ShortUrlStoreTest {
     ShortUrlStore store = new ShortUrlStore();
     Assertions.assertThrows(ShortUrlNotFoundException.class, () -> {
       store.getOriginalUrl(shortUrl.getShortUrl());
+    });
+  }
+
+  @Test
+  void testDeleteExpiredShortUrls_ShouldOnlyDeleteExpiredUrls() throws Exception {
+    ShortUrl expiredShortUrl = new ShortUrl("http://example.com/testOriginalUrl", domainName+"testShortUrl");
+    expiredShortUrl.setTimeToLive(LocalDateTime.now().minusHours(3));
+
+    ShortUrl shortUrlWithoutExpiration = new ShortUrl("http://example.com/testOriginalUrl/2abc", domainName+"testShortUrl2");
+
+    ShortUrl shortUrlWithTimeToLiveInTheFuture = new ShortUrl("http://example.com/testOriginalUrl/3cde", domainName+"testShortUrl3");
+    shortUrlWithTimeToLiveInTheFuture.setTimeToLive(LocalDateTime.now().plusMinutes(20));
+
+    ShortUrlStore store = new ShortUrlStore();
+
+    Assertions.assertTrue(store.save(expiredShortUrl));
+    Assertions.assertTrue(store.save(shortUrlWithoutExpiration));
+    Assertions.assertTrue(store.save(shortUrlWithTimeToLiveInTheFuture));
+
+    store.deleteExpiredShortUrls();
+
+    Assertions.assertEquals(shortUrlWithoutExpiration.getOriginalUrl(), store.getOriginalUrl(shortUrlWithoutExpiration.getShortUrl()));
+    Assertions.assertEquals(shortUrlWithTimeToLiveInTheFuture.getOriginalUrl(), store.getOriginalUrl(shortUrlWithTimeToLiveInTheFuture.getShortUrl()));
+    Assertions.assertThrows(ShortUrlNotFoundException.class, () -> {
+      store.getOriginalUrl(expiredShortUrl.getShortUrl());
     });
   }
 }

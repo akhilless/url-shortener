@@ -5,10 +5,12 @@ import com.jaravir.urlshortener.store.ShortUrl;
 import java.util.Random;
 
 public class RandomFixedLengthShortUrlGenerator extends ShortUrlGenerator {
+
   private final int SHORT_URL_LENGTH;
   private final char[] allowedChars;
 
-  public RandomFixedLengthShortUrlGenerator(String domainName, int shortUrlLength, char[] allowedChars) {
+  public RandomFixedLengthShortUrlGenerator(String domainName, int shortUrlLength,
+      char[] allowedChars) {
     super(domainName);
     if (shortUrlLength <= 0) {
       throw new IllegalArgumentException("shortUrlLength must be a positive integer.");

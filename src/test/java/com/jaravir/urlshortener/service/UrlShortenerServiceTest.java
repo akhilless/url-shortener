@@ -3,6 +3,7 @@ package com.jaravir.urlshortener.service;
 import com.jaravir.urlshortener.config.Configuration;
 import com.jaravir.urlshortener.store.ShortUrlStore;
 import com.jaravir.urlshortener.validator.ShortUrlValidator;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +14,7 @@ class UrlShortenerServiceTest {
   @Test
   void testCreateShortUrl_ValidUrl_SeoKeyWordProvided_ShouldUseSeoKeyWord() {
     UrlShortenerService service = createUrlShortenerService();
-    CreateShortUrlResponse response = service.createShortUrl(TEST_URL, SEO_KEYWORD);
+    CreateShortUrlResponse response = service.createShortUrl(TEST_URL, SEO_KEYWORD, null);
     Assertions.assertNotNull(response);
     Assertions.assertTrue(response.isSuccess());
     String shortUrl = response.getShortUrl();
@@ -65,11 +66,11 @@ class UrlShortenerServiceTest {
   @Test
   void testCreateRandomShortUrl_DuplicateOriginalUrl_ShouldFail() {
     UrlShortenerService service = createUrlShortenerService();
-    CreateShortUrlResponse response = service.createShortUrl(TEST_URL, null);
+    CreateShortUrlResponse response = service.createShortUrl(TEST_URL);
     Assertions.assertTrue(response.isSuccess());
     Assertions.assertNotNull(response.getShortUrl());
 
-    CreateShortUrlResponse secondResponse = service.createShortUrl(TEST_URL, null);
+    CreateShortUrlResponse secondResponse = service.createShortUrl(TEST_URL);
     Assertions.assertTrue(secondResponse.isFailed());
     Assertions.assertEquals(secondResponse.getFailureDescription(), "URL " + TEST_URL + " is already mapped to a short URL.");
   }
@@ -90,7 +91,7 @@ class UrlShortenerServiceTest {
   void testCreateShortUrl_NoKeyword_ShouldGenerateRandomShortUrl() {
     String domainName = Configuration.getInstance().getDomainName();
     UrlShortenerService service = createUrlShortenerService();
-    CreateShortUrlResponse response = service.createShortUrl(TEST_URL, null);
+    CreateShortUrlResponse response = service.createShortUrl(TEST_URL);
     Assertions.assertNotNull(response);
     Assertions.assertTrue(response.isSuccess());
     String shortUrl = response.getShortUrl();
@@ -114,7 +115,7 @@ class UrlShortenerServiceTest {
   void testGetOriginalUrl_ExistingRandomShortUrl_ShouldReturnOriginalUrl() {
     String originalUrlForRandomShortUrl = "http://example.com/someVeryLongUrl/abc1";
     UrlShortenerService service = createUrlShortenerService();
-    String randomShortUrl = service.createShortUrl(originalUrlForRandomShortUrl, null).getShortUrl();
+    String randomShortUrl = service.createShortUrl(originalUrlForRandomShortUrl).getShortUrl();
 
     GetOriginalUrlResponse randomUrlResponse = service.getOriginalUrl(randomShortUrl);
     Assertions.assertNotNull(randomUrlResponse.getShortUrl());
@@ -148,6 +149,23 @@ class UrlShortenerServiceTest {
     Assertions.assertTrue(nullShortUrlResponse.isFailed());
     Assertions.assertNull(nullShortUrlResponse.getOriginalUrl());
     Assertions.assertEquals("Invalid short URL.", nullShortUrlResponse.getFailureDescription());
+  }
+
+  @Test
+  void testCreateShortUrl_InvalidTimeToLive_ShouldFail() {
+    UrlShortenerService service = createUrlShortenerService();
+    CreateShortUrlResponse response = service.createShortUrl(TEST_URL, SEO_KEYWORD, LocalDateTime.now().minusHours(5));
+    Assertions.assertTrue(response.isFailed());
+    Assertions.assertEquals("Time to Live cannot be in the past.", response.getFailureDescription());
+  }
+
+  @Test
+  void testCreateShortUrl_ValidTimeToLive_ShouldCreateShortUrlWithProvidedTimeToLive() {
+    LocalDateTime timeToLive = LocalDateTime.now().plusHours(10);
+    UrlShortenerService service = createUrlShortenerService();
+    CreateShortUrlResponse response = service.createShortUrl(TEST_URL, SEO_KEYWORD, timeToLive);
+    Assertions.assertTrue(response.isSuccess());
+    Assertions.assertEquals(TEST_URL, service.getOriginalUrl(response.getShortUrl()).getOriginalUrl());
   }
 
   private UrlShortenerService createUrlShortenerService() {

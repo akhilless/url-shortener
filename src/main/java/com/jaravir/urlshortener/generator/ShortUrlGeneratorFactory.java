@@ -3,8 +3,11 @@ package com.jaravir.urlshortener.generator;
 import com.jaravir.urlshortener.config.Configuration;
 
 public class ShortUrlGeneratorFactory {
+
   private static ShortUrlGeneratorFactory instance;
-  private ShortUrlGeneratorFactory() {}
+
+  private ShortUrlGeneratorFactory() {
+  }
 
   public static ShortUrlGeneratorFactory getInstance() {
     if (instance == null) {
@@ -20,8 +23,9 @@ public class ShortUrlGeneratorFactory {
     if (seoKeyword != null && !seoKeyword.isEmpty()) {
       return new SeoShortUrlGenerator(domainName, seoKeyword);
     } else {
-      return new RandomFixedLengthShortUrlGenerator(domainName, randomShortUrlLength, Configuration.getInstance()
-          .getAllowedChars());
+      return new RandomFixedLengthShortUrlGenerator(domainName, randomShortUrlLength,
+          Configuration.getInstance()
+              .getAllowedChars());
     }
   }
 }

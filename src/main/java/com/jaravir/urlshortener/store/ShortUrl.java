@@ -1,10 +1,12 @@
 package com.jaravir.urlshortener.store;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class ShortUrl {
   private final String originalUrl;
   private final String shortUrl;
+  private LocalDateTime timeToLive;
 
   public ShortUrl(String originalUrl, String shortUrl) {
     this.originalUrl = originalUrl;
@@ -17,6 +19,18 @@ public class ShortUrl {
 
   public String getShortUrl() {
     return shortUrl;
+  }
+
+  public LocalDateTime getTimeToLive() {
+    return timeToLive;
+  }
+
+  public void setTimeToLive(LocalDateTime timeToLive) {
+    this.timeToLive = timeToLive;
+  }
+
+  public boolean isExpired() {
+    return timeToLive != null && timeToLive.isBefore(LocalDateTime.now());
   }
 
   @Override

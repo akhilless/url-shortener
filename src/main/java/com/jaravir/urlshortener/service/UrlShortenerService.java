@@ -1,6 +1,5 @@
 package com.jaravir.urlshortener.service;
 
-import com.jaravir.urlshortener.config.Configuration;
 import com.jaravir.urlshortener.generator.ShortUrlGenerator;
 import com.jaravir.urlshortener.generator.ShortUrlGeneratorFactory;
 import com.jaravir.urlshortener.store.DuplicateOriginalUrlException;
@@ -10,8 +9,10 @@ import com.jaravir.urlshortener.store.ShortUrlNotFoundException;
 import com.jaravir.urlshortener.store.ShortUrlStore;
 import com.jaravir.urlshortener.validator.ShortUrlValidator;
 import com.jaravir.urlshortener.validator.ValidationResult;
+import java.time.LocalDateTime;
 
 public class UrlShortenerService {
+
   private final ShortUrlStore store;
   private final ShortUrlValidator validator;
 
@@ -20,19 +21,36 @@ public class UrlShortenerService {
     this.validator = validator;
   }
 
-  public CreateShortUrlResponse createShortUrl(String originalUrl, String seoKeyword) {
-    CreateShortUrlResponse response = new CreateShortUrlResponse(originalUrl);
-    ValidationResult validationResult = validator.validateOriginalUrl(originalUrl);
+  public CreateShortUrlResponse createShortUrl(String originalUrl) {
+    return createShortUrl(originalUrl, null, null);
+  }
 
-    if (validationResult.isFailed()) {
-      response.setFailureDescription(validationResult.getFailureDescription());
+  public CreateShortUrlResponse createShortUrl(String originalUrl, String seoKeyword) {
+    return createShortUrl(originalUrl, seoKeyword, null);
+  }
+
+  public CreateShortUrlResponse createShortUrl(String originalUrl, String seoKeyword,
+      LocalDateTime timeToLive) {
+    CreateShortUrlResponse response = new CreateShortUrlResponse(originalUrl);
+    ValidationResult urlValidationResult = validator.validateOriginalUrl(originalUrl);
+
+    if (urlValidationResult.isFailed()) {
+      response.setFailureDescription(urlValidationResult.getFailureDescription());
       return response;
     }
 
-    ShortUrlGenerator generator = ShortUrlGeneratorFactory.getInstance().createShortUrlGenerator(seoKeyword);
-    ShortUrl shortUrl = generator.generate(originalUrl);
+    ValidationResult timeToLiveValidationResult = validator.validateTimeToLive(timeToLive);
 
-    //regenerate if random short url and failed to save due to duplication
+    if (timeToLiveValidationResult.isFailed()) {
+      response.setFailureDescription(timeToLiveValidationResult.getFailureDescription());
+      return response;
+    }
+
+    ShortUrlGenerator generator = ShortUrlGeneratorFactory.getInstance()
+        .createShortUrlGenerator(seoKeyword);
+    ShortUrl shortUrl = generator.generate(originalUrl);
+    shortUrl.setTimeToLive(timeToLive);
+
     try {
       store.save(shortUrl);
     } catch (DuplicateShortUrlException ex) {

@@ -1,5 +1,6 @@
 package com.jaravir.urlshortener.validator;
 
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -51,5 +52,12 @@ public class ShortUlrValidatorTest {
     ValidationResult result = validator.validateShortUrl("http://example.com/H33K9J");
     Assertions.assertTrue(result.isFailed());
     Assertions.assertEquals("Invalid short URL.", result.getFailureDescription());
+  }
+
+  @Test
+  void testValidateTimeToLive_OldDate_ShouldFail() {
+    ShortUrlValidator validator = new ShortUrlValidator();
+    ValidationResult result = validator.validateTimeToLive(LocalDateTime.now().minusMinutes(2));
+    Assertions.assertEquals("Time to Live cannot be in the past.", result.getFailureDescription());
   }
 }
