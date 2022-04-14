@@ -6,6 +6,15 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
+/**
+ * Models data storage for short urls. It uses locks to provide thread-safety as its instance is expected
+ * to be shared between multiple threads. {@link ShortUrlStore#store} is a stub for a database table
+ * `shorturl` and {@link ShortUrlStore#short2originalCache} is a stub for an index on shorturl on that
+ * table while locks are a stub for the transaction isolation mechanism of the database. In a real-life
+ * situation when the class uses database for storage none of the maps and locks
+ * would be necessary if the class does not cache any data. Then the class will rely on transaction isolation
+ * mechanism of the database.
+ */
 public class ShortUrlStore {
 
   private Map<String, ShortUrl> store = new HashMap<>();

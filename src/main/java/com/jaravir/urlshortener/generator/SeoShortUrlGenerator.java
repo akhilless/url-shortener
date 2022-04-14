@@ -2,6 +2,9 @@ package com.jaravir.urlshortener.generator;
 
 import com.jaravir.urlshortener.store.ShortUrl;
 
+/**
+ * Generates short urls with the provided SEO keyword
+ */
 public class SeoShortUrlGenerator extends ShortUrlGenerator {
   private final String SEO_KEYWORD;
 

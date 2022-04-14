@@ -4,6 +4,11 @@ import com.jaravir.urlshortener.config.Configuration;
 import java.time.LocalDateTime;
 import java.util.regex.Pattern;
 
+/**
+ * Provides very simple validation for long (original) URLS and time to live datetime objects.
+ * It is a stub for a validation framework that would normally be used in a production project
+ * (like Apache Commons Validator, etc.).
+ */
 public class ShortUrlValidator {
   private final Pattern VALID_URL_PATTERN = Pattern.compile("(https?://)?(www\\.)?[a-zA-Z0-9]+\\.[a-z]{2,3}/[a-zA-Z0-9/]+(/|(\\.html?))?");
   private static final String ORIGINAL_URL_VALIDATION_FAILURE_DESCRIPTION = "Invalid URL.";

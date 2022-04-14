@@ -11,6 +11,15 @@ import com.jaravir.urlshortener.validator.ShortUrlValidator;
 import com.jaravir.urlshortener.validator.ValidationResult;
 import java.time.LocalDateTime;
 
+/**
+ * Class intended to be used as service or controller for responding to short URL creation and original
+ * URL retrieval POST requests. Dependencies on {@link ShortUrlStore} and {@link ShortUrlValidator}
+ * are made external dependencies, so that the actual validator and store objects can be injected
+ * using constructor injection. It is especially useful for unit testing of the class through mocking
+ * of the above-mentioned dependencies (especially {@link ShortUrlStore} is expected to be mocked since
+ * in a real-world application it will contain side-effected code connecting to a database, committing
+ * transactions, etc.).
+ */
 public class UrlShortenerService {
 
   private final ShortUrlStore store;

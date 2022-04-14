@@ -1,5 +1,9 @@
 package com.jaravir.urlshortener.config;
 
+/**
+ * A Singleton that contains static configuration constants. For simplicity purposes, static configuration values are
+ * stored as constant fields. In a real-life project they would be read from properties file.
+ */
 public class Configuration {
   private static Configuration instance;
   private final String DOMAIN_NAME = "http://sho.com/";

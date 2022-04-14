@@ -4,6 +4,11 @@ import com.jaravir.urlshortener.config.Configuration;
 import com.jaravir.urlshortener.store.ShortUrl;
 import java.util.Random;
 
+/**
+ * Generates random short urls of pre-configured length. Characters for the generated short url
+ * are randomly selected from the {@link RandomFixedLengthShortUrlGenerator#allowedChars} character
+ * array (effectively serving as alphabet).
+ */
 public class RandomFixedLengthShortUrlGenerator extends ShortUrlGenerator {
 
   private final int SHORT_URL_LENGTH;
@@ -30,6 +35,6 @@ public class RandomFixedLengthShortUrlGenerator extends ShortUrlGenerator {
       sb.append(c);
       i++;
     }
-    return new ShortUrl(originalUrl, Configuration.getInstance().getDomainName() + sb.toString());
+    return new ShortUrl(originalUrl, Configuration.getInstance().getDomainName() + sb);
   }
 }

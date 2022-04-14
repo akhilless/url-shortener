@@ -2,6 +2,10 @@ package com.jaravir.urlshortener.generator;
 
 import com.jaravir.urlshortener.store.ShortUrl;
 
+/**
+ * Abstract class serving as the root of the inheritance tree of short url generators.
+ * Contains common fields and methods.
+ */
 public abstract class ShortUrlGenerator {
   private final String DOMAIN_NAME;
 
